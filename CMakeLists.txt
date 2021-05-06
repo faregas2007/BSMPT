@@ -20,10 +20,10 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 set(CMAKE_CXX_FLAGS_DEBUG
-    "${CMAKE_CXX_FLAGS_DEBUG} -pedantic -Wall -Wextra -Wmissing-declarations -Wmissing-include-dirs -Wshadow  -DCOMPILEDEBUG=true"
+    "${CMAKE_CXX_FLAGS_DEBUG} -g -o0 -pedantic -Wall -Wextra -Wmissing-declarations -Wmissing-include-dirs -Wshadow  -DCOMPILEDEBUG=true"
 )
 set(CMAKE_CXX_FLAGS_RELEASE
-    "${CMAKE_CXX_FLAGS_RELEASE} -O3 -pedantic -Wall -Wextra -Wshadow")
+    "${CMAKE_CXX_FLAGS_RELEASE} -g -o0 -O3 -pedantic -Wall -Wextra -Wshadow")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
