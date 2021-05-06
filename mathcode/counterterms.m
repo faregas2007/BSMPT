@@ -112,14 +112,14 @@ Do[coeffnames0[[i]] = coeffnames[[i]][[1]], {i,1, Length@coeffnames}];
 MatrixForm[coeffmatrix0 =DeleteDuplicates[coeffmatrix]]
 
 
-(* This step cannot be automatically due to the freedom of counter-terms parameters that are not being constrainted by the renormalization *)
+(* This step cannot be done automatically, have to be treated seperately, case by case*)
 (* WARNING: without careful handle the 0 row or colums inside the coeffmatrix0, the program will crash *)
 SetDirectory[NotebookDirectory[]]
 <<pivotgauss`
 rref = RREFpivot[coeffmatrix0, -coeffnames0, 0];
 
 
-(* need a imporvement to the CForm to export file in C++ for solutions *)
+(* need an imporvement to the CForm to export file in C++ for solutions *)
 (* adapt the notation in class template for N and H into WeinbergNabla(i) and WeinbergHesse(i,j) *)
 
 
