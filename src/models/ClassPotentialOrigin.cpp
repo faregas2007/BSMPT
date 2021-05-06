@@ -282,14 +282,14 @@ double Class_Potential_Origin::fbasequad(double MassSquaredA, double MassSquared
 	double mds = MassSquaredD;
 	double LogA = 0, LogB = 0, LogC =  0, LogD = 0;
 
-	double Thres = 1e-8;
+	double Thres = 1e-6;
 	if(std::abs(mas) < Thres) mas = 0;
 	if(std::abs(mbs) < Thres) mbs = 0;
 	if(std::abs(mcs) < Thres) mcs = 0;
 	if(std::abs(mds) < Thres) mds = 0;
-	if(std::abs(mas - mbs) < Thres) mas = mbs;
-	if(std::abs(mas - mcs) < Thres) mas = mcs;
-	if(std::abs(mas - mds) < Thres) mas = mds;
+	if(std::abs(mas - mbs) < Thres) mbs = mas;
+	if(std::abs(mas - mcs) < Thres) mcs = mas;
+	if(std::abs(mas - mds) < Thres) mds = mas;
 	if(std::abs(mbs - mcs) < Thres) mbs = mcs;
 	if(std::abs(mbs - mds) < Thres) mbs = mds;
 	if(std::abs(mcs - mds) < Thres) mcs = mds;
@@ -298,145 +298,348 @@ double Class_Potential_Origin::fbasequad(double MassSquaredA, double MassSquared
 	if(mbs != 0) LogB = std::log(mbs) - 2*std::log(scale);
 	if(mcs != 0) LogC = std::log(mcs) - 2*std::log(scale);
 	if(mds != 0) LogD = std::log(mds) - 2*std::log(scale);
+/*
+	double f0000 = 0.0, fa000 = LogA/(mas*mas), f0b00 = LogB/(mbs*mbs), f00c0 = LogC/(mcs*mcs), f000d = LogD/(mds*mds);
+	double fab00 = (mbs*LogA - mas*LogB)/((mas-mbs)*mas*mbs);
+	double faa00 = (1.0-LogA)/(mas*mas);
+	double fa0c0 = (mcs*LogA - mas*LogC)/(mas*mcs*(mas - mcs));
+	double fa0a0 = (1.0-LogA)/(mas*mas);
+	double fa00d = (mds*LogA - mas*LogD)/(mas*mds*(mas-mds));
+	double fa00a = (1.0 - LogA)/(mas*mas);
+	double f0bc0 = (mcs*LogB - mbs*LogC)/(mbs*mcs*(mbs-mcs));
+	double f0bb0 = (1.0 - LogB)/(mbs*mbs);
+	double f0b0d = (mds*LogB - mbs*LogD)/(mbs*mds*(mbs-mds));
+	double f0b0b = (1.0 - LogB)/(mbs*mbs);
+	double f00cd = (mds*LogC - mcs*LogD)/(mcs*mds*(mcs-mds));
+	double f00cc = (1.0 - LogC)/(mcs*mcs);
+	double fabc0 = ((mbs-mcs)*LogA + (mcs-mas)*LogB + (mas-mbs)*LogC)/((mas - mbs)*(mas - mcs)*(mbs - mcs));
+	double faac0 = (mas - mcs - mas*LogA + mas*LogC)/((mas-mcs)*(mas-mcs)*mas);
+	double faba0 = (mas - mbs - mas*LogA + mas*LogB)/(mas*(mas-mbs)*(mas-mbs));
+	double fabb0 = (-mas + mbs + mbs*LogA - mbs*LogB)/(mbs*(mas-mbs)*(mas-mbs));
+	double faaa0 = -1.0/(2.0*mas*mas);
+	double fab0d = ((mbs-mds)*LogA + (mds - mas)*LogB + (mas - mbs)*LogD)/((mas - mbs)*(mas-mds)*(mbs-mds));
+	double faa0d = (mas -mds -mas*LogA + mas*LogD)/(mas*(mas-mds)*(mas-mds));
+	double fab0a = (mas - mbs - mas*LogA + mas*LogB)/(mas*(mas-mbs)*(mas-mbs));
+	double fab0b = (-mas + mbs + mbs*LogB - mbs*LogB)/(mbs*(mas-mbs)*(mas-mbs));
+	double faa0a = -1.0/(2.0*mas*mas);
 
-	std::size_t C=1;
-	if(mas == 0 and mbs == 0 and mcs == 0 and mds == 0) res = 0;
-	else if(mas != 0 and mbs == 0 and mcs == 0 and mds == 0)
-	{
+	double fa0cd = ((mcs - mds)*LogA + (mds - mas)*LogC + (mas - mcs)*LogD)/((mas-mcs)*(mas-mds)*(mcs-mds));
+	double fa0ad = (mas - mds - mas*LogA + mas*LogD)/(mas*(mas - mds)*(mas-mds));
+	double fa0ca = (mas -mcs - mas*LogA + mas*LogC)/(mas*(mas-mcs)*(mas-mcs));
+	double fa0cc = -1.0/(2.0*mcs*mcs);
+	double fa0aa = -1.0/(2.0*mas*mas);
+	double f0bcd = ((mcs-mds)*LogB + (mds-mbs)*LogC + (mbs-mcs)*LogD)/((mbs-mcs)*(mbs-mds)*(mcs-mds));
+	double f0bbd = (mbs - mds - mbs*LogB + mbs*LogD)/(mbs*(mbs-mds)*(mbs-mds));
+	double f0bcb = (mbs - mcs - mbs*LogB + mbs*LogC)/(mbs*(mbs-mcs)*(mbs-mcs));
+	double f0bcc = (-mbs + mcs + mcs*LogB - mcs*LogC)/((mbs-mcs)*(mbs-mcs)*mcs);
+	double f0bbb = -1.0/(2.0*mbs*mbs);
+
+	double faacd = ((mcs-mds)*(-mas*mas + mcs*mds)*LogA + mcs*(mas-mds)*(mas-mds)*LogC + (mas-mcs)*((mas-mds)*(mcs-mds) + (mcs-mas)*mds*LogD))/((mas-mcs)*(mas-mcs)*(mas-mds)*(mas-mds)*(mcs-mds));
+	double fabad = ((mbs-mds)*(-mas*mas + mbs*mds)*LogA + mbs*(mas-mds)*(mas-mds)*LogB + (mas-mbs)*((mas-mds)*(mbs-mds) + (-mas + mds)*mds*LogD))/((mas-mbs)*(mas-mbs)*(mas-mds)*(mas-mds)*(mbs-mds));
+	double fabca = ((mbs-mcs)*(-mas*mas + mbs*mcs)*LogA + mbs*(mas-mcs)*(mas-mcs)*LogB + (mas-mbs)*((mas-mcs)*(mbs-mcs) + (-mas + mbs)*mcs*LogC))/((mas-mbs)*(mas-mbs)*(mas-mcs)*(mas-mcs)*(mbs-mcs));
+	double fabbd = mas*LogA/((mas-mbs)*(mas-mbs)*(mas-mds)) + (-(mas-mbs)*(mbs-mds) + (-mbs*mbs + mas*mds)*LogB)/((mas-mbs)*(mas-mbs)*(mbs-mds)*(mbs-mds)) + (mds*LogD)/((mbs-mds)*(mbs-mds)*(mds-mas));
+	double fabcb = mas*LogA/((mas-mbs)*(mas-mbs)*(mas-mcs)) + (-(mas-mbs)*(mbs-mcs) + (-mbs*mbs + mas*mcs)*LogB)/((mas-mbs)*(mas-mbs)*(mbs-mcs)*(mbs-mcs)) + mcs*LogC/((mbs-mcs)*(mbs-mcs)*(-mas+mcs));
+	double fabcc = (mas*(mbs-mcs)*(mbs-mcs)*LogA - mbs*(mas-mcs)*(mas-mcs)*LogB + (mas-mbs)*((mas-mcs)*(mbs-mcs) + (mas*mbs - mcs*mcs)*LogC))/((mas-mbs)*(mas-mcs)*(mas-mcs)*(mbs-mcs)*(mbs-mcs));
+
+	double faaad = (-mas*mas + mds*mds + 2.0*mas*mds*LogA - 2.0*mas*mds*LogD)/(2.0*mas*(mas-mds)*(mas-mds)*(mas-mds));
+	double faaca = (-mas*mas + mcs*mcs + 2.0*mas*mcs*LogA - 2.0*mas*mcs*LogC)/(2.0*mas*(mas-mcs)*(mas-mcs)*(mas-mcs));
+	double fabaa = (-mas*mas + mbs*mbs + 2.0*mas*mbs*LogA - 2.0*mas*mbs*LogB)/(2.0*mas*(mas-mbs)*(mas-mbs)*(mas-mbs));
+	double fabbb = (-mas*mas + mbs*mbs + 2.0*mas*mbs*LogA - 2.0*mas*mbs*LogB)/(2.0*mbs*(mas-mbs)*(mas-mbs)*(mas-mbs));
+
+	double faacc = (2.0*(mas-mcs) - (mas+mcs)*LogA + (mas+mcs)*LogC)/((mas-mcs)*(mas-mcs)*(mas-mcs));
+	double fabab = (2.0*(mas-mbs) - (mas+mbs)*LogA + (mas+mbs)*LogB)/((mas-mbs)*(mas-mbs)*(mas-mbs));
+	double fabba = (2.0*(mas-mbs) - (mas+mbs)*LogA + (mas+mbs)*LogB)/((mas-mbs)*(mas-mbs)*(mas-mbs));
+
+	double faaaa = -1.0/(6.0*mas*mas);
+	double fabcd = mas*LogA/((mas-mbs)*(mas-mcs)*(mas-mds)) + mbs*LogB/((mbs-mas)*(mbs-mcs)*(mbs-mds)) + mcs*LogC/((mcs-mas)*(mcs-mbs)*(mcs-mds)) + mds*LogD/((mds-mas)*(mds-mbs)*(mds-mcs));
+*/
+	std::size_t C = 1;
+	if(mas == 0 and mbs == 0 and mcs ==  0 and mds == 0){
+		C =1;
+		//res = f0000;
+		res =  0.0;
+	}
+	else if(mas != 0 and mbs == 0 and mcs == 0 and mds == 0){
 		C = 2;
-		res = 0;
+		//res = fa000;
+		//res = 0.0; 
+		res = LogA/(mas*mas);
 	}
-	else if(mas == 0 and mbs != 0 and mcs == 0 and mds == 0)
-	{
+	else if(mas == 0 and mbs != 0 and mcs == 0 and mds == 0){
 		C = 3;
-		res = 0;
+		//res = f0b00;
+		//res = 0.0; 
+		res =  LogB/(mbs*mbs);
 	}
-	else if(mas == 0 and mbs ==0 and mcs != 0 and mds == 0)
-	{
+	else if(mas == 0 and mbs == 0 and mcs != 0 and mds == 0){
 		C = 4;
-		res = 0;
+		//res = f00c0;
+		//res = 0.0; 
+		res = LogC/(mcs*mcs);
 	}
-	else if(mas == 0 and mbs == 0 and mcs == 0 and mds != 0)
-	{
+	else if(mas == 0 and mbs == 0 and mcs == 0 and mds != 0){
 		C = 5;
-		res = 0;
+		//res = f000d;
+		//res = 0.0; 
+		res = LogD/(mds*mds);
 	}
-	else if(mas != 0 and mbs != 0 and mcs == 0 and mds == 0 and mas != mbs)
-	{
-		C = 6;
-		res = (mas - mbs + mbs*LogA - mbs*LogB)/(mas*mbs*(mas-mbs));
+	else if(mas != 0 and mbs != 0 and mcs == 0 and mds == 0 and mas != mbs){
+		C =  6;
+		//res = fab00;
+		//res = (mbs*LogA - mas*LogB)/((mas-mbs)*mas*mbs);
+		res = std::pow(mas*mbs,-1) + (mbs*LogA-mas*LogB)/(mas*mbs*(mas-mbs));
 	}
-	else if(mas != 0 and mbs == 0 and mcs != 0 and mds == 0 and mas != mcs)
-	{
+	else if(mas != 0 and mbs == mas and mcs == 0 and mds == 0){
 		C = 7;
-		res = (mas - mcs + mcs*LogA - mas*LogC)/(mas*mcs*(mas-mcs));
+		//res = faa00;
+		res = (2.0*mas - mas*LogA)/(mas*mas*mas); 
+		//res = (1.0-LogA)/(mas*mas);
 	}
-	else if(mas != 0 and mbs == 0 and mcs == 0 and mds != 0 and mas != mds)
-	{
-		C = 8;
-		res = (mas - mds + mds*LogA - mas*LogD)/(mas*mds*(mas-mds));
+	else if(mas != 0 and mbs == 0 and mcs !=0 and mds == 0 and mas != mcs){
+		C =  8;
+		//res = fa0c0;
+		//res = (mcs*LogA - mas*LogC)/(mas*mcs*(mas - mcs));
+		res = std::pow(mas*mcs,-1) + (mcs*LogA-mas*LogC)/(mas*mcs*(mas-mcs));
 	}
-	else if(mas == 0 and mbs != 0 and mcs != 0 and mds == 0 and mbs != mcs)
-	{
+	else if(mas != 0 and mbs == 0 and mcs == mas and mds == 0){
 		C = 9;
-		res = (mbs - mcs + mcs*LogB - mbs*LogC)/(mbs*mcs*(mbs-mcs));
+		//res = fa0a0;
+		res = (2.0*mas - mas*LogA)/(mas*mas*mas); 
+		//res = (1.0-LogA)/(mas*mas);
 	}
-	else if(mas == 0 and mbs != 0 and mcs == 0 and mds != 0 and mbs != mds)
-	{
+	else if(mas != 0 and mbs == 0 and mcs == 0 and mds != 0 and mds != mas){
 		C = 10;
-		res = (mbs -mds + mds*LogD - mbs*LogD)/(mbs*mds*(mbs-mds));
+		//res = fa00d;
+		//res =(mds*LogA - mas*LogD)/(mas*mds*(mas-mds));
+		res = std::pow(mas*mds,-1) + (mds*LogA-mas*LogD)/(mas*mds*(mas-mds));
 	}
-	else if(mas == 0 and mbs == 0 and mcs != 0 and mds != 0 and mcs != mds)
-	{
+	else if(mas != 0 and mbs == 0 and mcs == 0 and mds == mas){
 		C = 11;
-		res = (mcs - mds + mds*LogC - mcs*LogD)/(mcs*mds*(mcs-mds));
+		//res = fa00a;
+		res = (2.0*mas - mas*LogA)/(mas*mas*mas); 
+		//res = (1.0 - LogA)/(mas*mas);
 	}
-	else if(mas != 0 and mbs != 0 and mcs != 0 and mds == 0 and mas != mbs and mas != mcs and mbs != mcs)
-	{
+	else if(mas == 0 and mbs != 0 and mcs != 0 and mds == 0 and mbs != mcs){
 		C = 12;
-		res = ((mbs -mcs)*LogA + (-mas + mcs)*LogB + (mas - mbs)*LogC)/((mas-mbs)*(mas-mcs)*(mbs-mcs));
+		//res = f0bc0;
+		res = std::pow(mbs*mcs,-1) + (mcs*LogB-mbs*LogC)/(mbs*mcs*(mbs-mcs));
+		//res =(mcs*LogB - mbs*LogC)/(mbs*mcs*(mbs-mcs));
 	}
-	else if(mas != 0 and mbs != 0 and mcs == 0 and mds != 0 and mas != mbs and mas != mds and mbs != mds)
-	{
+	else if(mas == 0 and mbs !=  0 and mcs == mbs and mds == 0){
 		C = 13;
-		res =((mbs- mds)*LogA + (-mas + mds)*LogB + (mas- mbs)*LogD)/((mas-mbs)*(mas-mds)*(mbs-mds));
+		//res = f0bb0;
+		res =  (2.0*mbs + mbs*LogB)/(mbs*mbs*mbs); 
+		//res = (1.0 - LogB)/(mbs*mbs);
 	}
-	else if(mas != 0 and mbs == 0 and mcs != 0 and mds != 0 and mas != mcs and mas != mds and mcs != mds)
-	{
+	else if(mas == 0 and mbs != 0 and mcs == 0 and mds != 0 and mbs != mds){
 		C = 14;
-		res =((mcs-mds)*LogA + (mds-mas)*LogC + (mas -mcs)*LogD)/((mas-mcs)*(mas-mds)*(mcs-mds));
+		//res = f0b0d;
+		res = std::pow(mbs*mds,-1) + (mds*LogB-mbs*LogD)/(mbs*mds*(mbs-mds));
+		//res = (mds*LogB - mbs*LogD)/(mbs*mds*(mbs-mds));
 	}
-	else if(mas == 0 and mbs != 0 and mcs != 0 and mds != 0 and mbs != mcs and mbs != mds and mcs != mds)
-	{
+	else if(mas == 0 and mbs != 0 and mcs == 0 and mds != 0 and mds == mbs){
 		C = 15;
-		res = ((mcs-mds)*LogB + (-mbs+mds)*LogC + (mbs-mcs)*LogD)/((mbs-mcs)*(mbs-mds)*(mcs-mds));
+		//res = f0b0b;
+		res = (2.0*mbs + mbs*LogB)/(mbs*mbs*mbs); 
+		//res = (1.0 - LogB)/(mbs*mbs);
 	}
-	else if(mas == mbs and mas != mcs and mas != mds and mcs != mds and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas == 0 and mbs == 0 and mcs != 0 and mds != 0 and mcs != mds){
 		C = 16;
-		res = ((mcs-mds)*(-mas*mas + mcs*mds)*LogA + mcs*(mas-mds)*(mas-mds)*LogC + (mas-mcs)*((mas-mds)*(mcs-mds) + (-mas +mcs)*mds*LogD))/((mas-mcs)*(mas-mcs)*(mas-mds)*(mas-mds)*(mcs-mds));
+		//res = f00cd;
+		res = std::pow(mcs*mds,-1) + (mds*LogC-mcs*LogD)/(mcs*mds*(mcs-mds));
+		//res =(mds*LogC - mcs*LogD)/(mcs*mds*(mcs-mds));
 	}
-	else if(mas == mcs and mas != mbs and mas != mds and mbs != mcs and mbs != mds and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas == 0 and mbs == 0 and mcs != 0 and mds != 0 and mds == mcs){
 		C = 17;
-		res = ((mbs-mds)*(-mas*mas + mbs*mds)*LogA + mbs*(mas-mds)*(mas-mds)*LogB + (mas-mbs)*((mas-mds)*(mbs-mds) + (-mas+mbs)*mds*LogD))/((mas-mbs)*(mas-mbs)*(mas-mds)*(mas-mds)*(mbs-mds));
+		//res = f00cc;
+		res = (2.0*mcs + mcs*LogC)/(mcs*mcs*mcs); 
+		//res = (1.0 - LogC)/(mcs*mcs);
 	}
-	else if(mas == mds and mas != mbs and mas != mcs and mbs != mcs and mbs != mds and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas != 0 and mbs != 0 and mcs !=0 and mds == 0 and mas != mbs and mas != mcs and mbs!= mcs){
 		C = 18;
-		res = ((mbs-mcs)*(-mas*mas + mbs*mcs)*LogA + mbs*(mas-mcs)*(mas-mcs)*LogB + (mas-mbs)*((mas-mcs)*(mbs-mcs) + (-mas + mbs)*mcs*LogC))/((mas-mbs)*(mas-mbs)*(mas-mcs)*(mas-mcs)*(mbs-mcs));
+		//res = fabc0;
+		res =((mbs-mcs)*LogA + (mcs-mas)*LogB + (mas-mbs)*LogC)/((mas - mbs)*(mas - mcs)*(mbs - mcs));
 	}
-	else if(mas == mbs and mcs == mbs and mas != mcs and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas != 0 and mbs == mas and mcs != 0 and mds == 0 and mcs != mas){
 		C = 19;
-		res = (2*(mas-mcs) - (mas+mcs)*LogA + (mas+mcs)*LogC)/((mas-mcs)*(mas-mcs)*(mas-mcs));
+		//res = faac0;
+		res =(mas - mcs - mas*LogA + mas*LogC)/((mas-mcs)*(mas-mcs)*mas);
 	}
-	else if(mas == mcs and mbs == mds and mas != mbs and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas != 0 and mbs != 0 and mcs == mas and mds == 0 and mas != mbs){
 		C = 20;
-		res = (2*(mas-mbs) - (mas+mbs)*LogA + (mas+mbs)*LogB)/((mas-mbs)*(mas-mbs)*(mas-mbs));
+		//res = faba0;
+		res =(mas - mbs - mas*LogA + mas*LogB)/(mas*(mas-mbs)*(mas-mbs));
 	}
-	else if(mas == mds and mbs == mcs and mas != mbs and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas != 0 and mbs != 0 and mcs == mbs and mds == 0 and mbs != mas){
 		C = 21;
-		res = (2*(mas-mbs) - (mas+mbs)*LogA + (mas+mbs)*LogB)/((mas-mbs)*(mas - mbs)*(mas-mbs));
+		//res = fabb0;
+		res =(-mas + mbs + mbs*LogA - mbs*LogB)/(mbs*(mas-mbs)*(mas-mbs));
 	}
-	else if(mas == mbs and mbs == mcs and mas != mds and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas != 0 and mbs == mas and mcs == mas and mds == 0){
 		C = 22;
-		res = (-mas*mas + mds*mds + 2*mas*mds*LogA - 2*mas*mds*LogD)/(2*mas*(mas - mds)*(mas-mds)*(mas-mds));
+		//res = faaa0;
+		res = -1.0/(2.0*mas*mas);
 	}
-	else if(mas == mbs and mbs == mds and mas != mcs and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas != 0 and mbs != 0 and mcs == 0 and mds != 0 and mas != mbs and mas != mds and mbs != mds){
 		C = 23;
-		res = (-mas*mas + mcs*mcs + 2*mas*mcs*LogA - 2*mas*mcs*LogC)/(2*mas*(mas-mcs)*(mas-mcs));
+		//res = fab0d;
+		res =((mbs-mds)*LogA + (mds - mas)*LogB + (mas - mbs)*LogD)/((mas - mbs)*(mas-mds)*(mbs-mds));
 	}
-	else if(mas == mcs and mcs == mds and mas != mbs and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas != 0 and mbs == mas and mcs == 0 and mds != 0 and mds != mas){
 		C = 24;
-		res = (-mas*mas + mbs*mbs + 2*mas*mbs*LogA - 2*mas*mbs*LogB)/(2*mas*(mas-mbs)*(mas-mbs));
+		//res = faa0d;
+		res = (mas -mds -mas*LogA + mas*LogD)/(mas*(mas-mds)*(mas-mds));
 	}
-	else if(mbs == mcs and mcs == mds and mas != mbs and mas != 0 and mbs != 0 and mcs != 0 and mds != 0)
-	{
+	else if(mas != 0 and mbs != 0 and mcs == 0 and mds == mas and mbs != mas){
 		C = 25;
-		res = (-mas*mas + mbs*mbs + 2*mas*mbs*LogA - 2*mas*mbs*LogB)/(2*(mas-mbs)*(mas-mbs)*(mas-mbs)*mbs);
+		//res = fab0a;
+		res =(mas - mbs - mas*LogA + mas*LogB)/(mas*(mas-mbs)*(mas-mbs));
 	}
-	else if(mas == mbs and mas == mcs and mas == mds and mas != 0)
-	{
+	else if(mas != 0 and mbs != 0 and mcs == 0 and mds == mbs and mbs != mas){
 		C = 26;
-		res = -0.1e1/(0.6e1*mas*mas);
+		//res = fab0b;
+		res =(-mas + mbs + mbs*LogB - mbs*LogB)/(mbs*(mas-mbs)*(mas-mbs));
 	}
-	else if(mas != mbs and mas != mcs and mas != mds and mbs != mcs and mbs != mds and mcs != mds and mas != 0)
-	{
+	else if(mas != 0 and mbs == mas and mcs == 0 and mds == mas){
 		C = 27;
-		res = mas*LogA/((mas - mbs)*(mas - mcs)*(mas - mds)) + mbs*LogB/((mbs - mas)*(mbs - mcs)*(mbs - mds)) + mcs*LogC/((mcs - mas)*(mcs - mbs)*(mcs - mds)) + mds*LogD/((mds - mas)*(mds - mbs)*(mds - mcs));
+		//res = faa0a;
+		res =-1/(2*mas*mas);
 	}
-
+	else if(mas != 0 and mbs == 0 and mcs !=  0 and mds != 0 and mas!= mcs and mas!= mds and mcs != mds){
+		C = 28;
+		//res = fa0cd;
+		res =((mcs - mds)*LogA + (mds - mas)*LogC + (mas - mcs)*LogD)/((mas-mcs)*(mas-mds)*(mcs-mds));
+	}
+	else if(mas != 0 and mbs == 0 and mcs == mas and mds != 0 and mds != mas){
+		C = 29;
+		//res = fa0ad;
+		res =(mas - mds - mas*LogA + mas*LogD)/(mas*(mas - mds)*(mas-mds));
+	}
+	else if(mas != 0 and mbs == 0 and mcs != 0 and mds == mas and mcs != mas){
+		C = 30;
+		//res = fa0ca;
+		res =(mas -mcs - mas*LogA + mas*LogC)/(mas*(mas-mcs)*(mas-mcs));
+	}
+	else if(mas != 0 and mbs == 0 and mcs != 0 and mds == mcs and mcs != mas){
+		C = 31;
+		//res = fa0cc;
+		res = (mcs - mas + mcs * std::log(mas/mcs)) / (mcs * std::pow((mcs - mas),2));
+		//res =-1.0/(2.0*mcs*mcs);
+	}
+	else if(mas != 0 and mbs == 0 and mcs == mas and mds == mas){
+		C = 32;
+		//res = fa0aa;
+		res = -1/(2*mas*mas);
+	}
+	else if(mas == 0 and mbs != 0 and mcs !=0 and mds != 0 and mbs != mcs and mbs != mds and mcs!= mds){
+		C = 33;
+		//res = f0bcd;
+		res = ((mcs - mds)*LogB + (mds - mbs)*LogC + (mbs - mcs)*LogD)/((mbs-mcs)*(mbs-mds)*(mcs-mds));
+	}
+	else if( mas == 0 and mbs != 0 and mcs == mbs and mds !=0 and mbs != mds){
+		C = 34;
+		//res = f0bbd;
+		res =(mbs - mds - mbs*LogB + mbs*LogD)/(mbs*(mbs-mds)*(mbs-mds));
+	}
+	else if(mas == 0 and mbs != 0 and mcs != 0 and mds == mbs and mbs != mcs){
+		C = 35;
+		//res = f0bcb;
+		res =(mbs - mcs - mbs*LogB + mbs*LogC)/(mbs*(mbs-mcs)*(mbs-mcs));
+	}
+	else if(mas == 0 and mbs != 0 and mcs != 0 and mds == mcs and mcs != mbs){
+		C = 36;
+		//res = f0bcc;
+		res =(-mbs + mcs + mcs*LogB - mcs*LogC)/((mbs-mcs)*(mbs-mcs)*mcs);
+	}
+	else if(mas == 0 and mbs != 0 and mcs == mbs and mds == mbs){
+		C = 37;
+		//res = f0bbb;
+		res =-1.0/(2.0*mbs*mbs);
+	}
+	else if(mas != 0 and mbs == mas and mcs != 0 and mds != 0 and mcs != mas and mas != mds and mcs != mds){
+		C = 38;
+		//res = faacd;
+		res =((mcs-mds)*(-mas*mas + mcs*mds)*LogA + mcs*(mas-mds)*(mas-mds)*LogC + (mas-mcs)*((mas-mds)*(mcs-mds) + (mcs-mas)*mds*LogD))/((mas-mcs)*(mas-mcs)*(mas-mds)*(mas-mds)*(mcs-mds));
+	}
+	else if(mas != 0 and mbs != 0 and mcs == mas and mds != 0 and mas != mbs and mas != mds and mbs != mds){
+		C = 39;
+		//res = fabad;
+		//res =((mbs-mds)*(-mas*mas + mbs*mds)*LogA + mbs*(mas-mds)*(mas-mds)*LogB + (mas-mbs)*((mas-mds)*(mbs-mds) + (-mas + mds)*mds*LogD))/((mas-mbs)*(mas-mbs)*(mas-mds)*(mas-mds)*(mbs-mds));
+		res = (mbs*std::pow((mas-mds),2)*LogB-mds*std::pow((mas-mbs),2)*LogD+(mbs-mds)*((mas-mbs)*(mas-mds)+(-std::pow(mas,2)+mbs*mds)*LogA))/(std::pow((mas-mbs),2)*std::pow((mas-mds),2)*(mbs-mds));
+	}
+	else if(mas != 0 and mbs != 0 and mcs != 0 and mds == mas and mas != mbs and mas != mcs and mbs != mcs){
+		C = 40;
+		//res = fabca;
+		res =((mbs-mcs)*(-mas*mas + mbs*mcs)*LogA + mbs*(mas-mcs)*(mas-mcs)*LogB + (mas-mbs)*((mas-mcs)*(mbs-mcs) + (-mas + mbs)*mcs*LogC))/((mas-mbs)*(mas-mbs)*(mas-mcs)*(mas-mcs)*(mbs-mcs));
+	}
+	else if(mas != 0 and mbs != 0 and mcs == mbs and mds != 0 and mas != mbs and mbs != mds and mas != mds){
+		C = 41;
+		//res = fabbd;
+		res = mas*LogA/((mas-mbs)*(mas-mbs)*(mas-mds)) + (-(mas-mbs)*(mbs-mds) + (-mbs*mbs + mas*mds)*LogB)/((mas-mbs)*(mas-mbs)*(mbs-mds)*(mbs-mds)) + (mds*LogD)/((mbs-mds)*(mbs-mds)*(mds-mas));
+	}
+	else if(mas != 0 and mbs != 0 and mcs != 0 and mds == mbs and mas != mbs and mas != mcs and mbs != mcs){
+		C = 42;
+		//res = fabcb;
+		res = mas*LogA/((mas-mbs)*(mas-mbs)*(mas-mcs)) + (-(mas-mbs)*(mbs-mcs) + (-mbs*mbs + mas*mcs)*LogB)/((mas-mbs)*(mas-mbs)*(mbs-mcs)*(mbs-mcs)) + mcs*LogC/((mbs-mcs)*(mbs-mcs)*(-mas+mcs));
+	}
+	else if(mas != 0 and mbs != 0 and mcs != 0 and mds == mcs and mas != mbs and mas != mcs and mbs != mcs){
+		C = 43;
+		//res = fabcc;
+		res =(mas*(mbs-mcs)*(mbs-mcs)*LogA - mbs*(mas-mcs)*(mas-mcs)*LogB + (mas-mbs)*((mas-mcs)*(mbs-mcs) + (mas*mbs - mcs*mcs)*LogC))/((mas-mbs)*(mas-mcs)*(mas-mcs)*(mbs-mcs)*(mbs-mcs));
+	}
+	else if(mas != 0 and mbs == mas and mcs == mas and mds != 0 and mds != mas){
+		C = 44;
+		//res = faaad;
+		res = (-mas*mas + mds*mds + 2.0*mas*mds*LogA - 2.0*mas*mds*LogD)/(2.0*mas*(mas-mds)*(mas-mds)*(mas-mds));
+	}
+	else if(mas != 0 and mbs == mas and mcs != 0 and mds == mas and mas != mcs){
+		C = 45;
+		//res = faaca;
+		res = (-mas*mas + mcs*mcs + 2.0*mas*mcs*LogA - 2.0*mas*mcs*LogC)/(2.0*mas*(mas-mcs)*(mas-mcs)*(mas-mcs));
+	}
+	else if(mas != 0 and mbs != 0 and mcs == mas and mds == mas and mas != mbs){
+		C = 46;
+		//res = fabaa;
+		res = (-mas*mas + mbs*mbs + 2.0*mas*mbs*LogA - 2.0*mas*mbs*LogB)/(2.0*mas*(mas-mbs)*(mas-mbs)*(mas-mbs));
+	}
+	else if(mas != 0 and mbs != 0 and mcs == mbs and mds == mbs and mas != mbs){
+		C = 47;
+		//res = fabbb;
+		res = (-mas*mas + mbs*mbs + 2.0*mas*mbs*LogA - 2.0*mas*mbs*LogB)/(2.0*mbs*(mas-mbs)*(mas-mbs)*(mas-mbs));
+	}
+	else if(mas != 0 and mbs == mas and mcs != 0 and mds == mcs and mas != mcs){
+		C = 48;
+		//res = faacc;
+		res = (2.0*(mas-mcs) - (mas+mcs)*LogA + (mas+mcs)*LogC)/((mas-mcs)*(mas-mcs)*(mas-mcs));
+	}
+	else if(mas != 0 and mbs != 0 and mcs == mas and mds == mbs and mas != mbs){
+		C = 49;
+		//res = fabab;
+		res = (2.0*(mas-mbs) - (mas+mbs)*LogA + (mas+mbs)*LogB)/((mas-mbs)*(mas-mbs)*(mas-mbs));
+	}
+	else if(mas != 0 and mbs != 0 and mcs == mbs and mds == mas and mas != mbs){
+		C = 50;
+		//res = fabba;
+		res = (2.0*(mas-mbs) - (mas+mbs)*LogA + (mas+mbs)*LogB)/((mas-mbs)*(mas-mbs)*(mas-mbs));
+	}
+	else if(mas != 0 and mbs == mas and mcs == mas and mds == mas){
+		C = 51;
+		//res = faaaa;
+		res = -1.0/(6.0*mas*mas);
+	}
+	else if(mas != 0 and mbs != 0 and mcs != 0 and mds != 0 and mas != mbs and mas != mcs and mas != mds and mbs != mcs and mbs != mds and mcs != mds)
+	{
+		C = 52;
+		//res = fabcd;
+		res = mas*LogA/((mas-mbs)*(mas-mcs)*(mas-mds)) + mbs*LogB/((mbs-mas)*(mbs-mcs)*(mbs-mds)) + mcs*LogC/((mcs-mas)*(mcs-mbs)*(mcs-mds)) + mds*LogD/((mds-mas)*(mds-mbs)*(mds-mcs));
+	}
 	if(std::isnan(res) or std::isinf(res)) {
-		std::cout << "mas  = " << mas << std::endl;
-		std::cout << "mbs  = " << mbs << std::endl;
-		std::cout << "mcs  = " << mcs << std::endl;
-		std::cout << "mds  = " << mds << std::endl;
+		std::cout << "mas = " << mas << std::endl;
+		std::cout << "mbs = " << mbs << std::endl;
+		std::cout << "mcs = " << mcs << std::endl;
+		std::cout << "mds = " << mds << std::endl;
+		std::cout << "C = " << C << std::endl;
+		std::cout << "res = " << res << std::endl;
 		std::string throwstring = "Found nan at line = ";
 		throwstring += std::to_string(InputLineNumber);
 		throwstring += " in function ";
@@ -450,9 +653,129 @@ double Class_Potential_Origin::fbasequad(double MassSquaredA, double MassSquared
 	return res;
 }
 
+double Class_Potential_Origin::fbaseTri(double MassSquaredA, double MassSquaredB, double MassSquaredC) const
+{
+    double res = 0;
+    double mas = MassSquaredA;
+    double mbs = MassSquaredB;
+    double mcs = MassSquaredC;
+    double LogA = 0, LogB = 0, LogC = 0;
+    double Thres = 1e-8;
+    if(std::abs(mas) < Thres) mas = 0;
+    if(std::abs(mbs) < Thres) mbs = 0;
+    if(std::abs(mcs) < Thres) mcs = 0;
+    if(std::abs(mas-mbs) < Thres) mas = mbs;
+    if(std::abs(mas-mcs) < Thres) mas = mcs;
+    if(std::abs(mbs-mcs) < Thres) mbs = mcs;
+
+    if(mas != 0) LogA = std::log(mas) - 2*std::log(scale);
+    if(mbs != 0) LogB = std::log(mbs) - 2*std::log(scale);
+    if(mcs != 0) LogC = std::log(mcs) - 2*std::log(scale);
+
+    std::size_t C = 1;
+
+    // 1) all masses are zero
+    if(mas == 0 and mbs == 0 and mcs == 0) res = 0;
+
+    // 2) one mass is non-zero
+    else if(mas != 0 and mbs == 0 and mcs == 0)
+    {
+        C = 2;
+        res = (LogA-1.0)/ mas;
+        //res = LogA/mas;     
+    }
+    else if(mas == 0 and mbs != 0 and mcs == 0)
+    {
+        C = 3;
+        res = (LogB-1.0)/ mbs;
+        //res = LogB/mbs;
+    }
+    else if(mas == 0 and mbs == 0 and mcs != 0)
+    {
+        C = 4;
+        res = (LogC-1.0)/ mcs;
+        //res = LogC/mcs;
+    }
+
+    // 3) two masses are non-zero
+    // 3.1) non-zero masses are equal
+    else if (mas == mbs and mas != 0 and mcs == 0)
+    {
+        C = 5;
+        res = std::pow(mas,-1);
+    }
+    else if (mas == mcs and mas != 0 and mbs == 0)
+    {
+        C = 6;
+        res = std::pow(mas,-1);
+    }
+    else if (mbs == mcs and mbs != 0 and mas == 0)
+    {
+        C = 7;
+        res = std::pow(mbs,-1);
+    }
+    // 3.2) non-zero masses are not equal
+    else if (mas != 0 and mbs != 0 and mas != mbs and mcs == 0)
+    {
+        C = 8;
+        res = (std::log(mas) - std::log(mbs)) / (mas - mbs);    //DIFFERENT!!!! (not included in fbaseTri)
+    }
+    else if (mas != 0 and mcs != 0 and mas != mcs and mbs == 0)
+    {
+        C = 9;
+        res = (std::log(mas) - std::log(mcs)) / (mas - mcs);    //DIFFERENT!!!!
+    }
+    else if (mas == 0 and mbs != 0 and mcs != 0 and mbs != mcs)
+    {
+        C = 10;
+        res = (std::log(mbs) - std::log(mcs)) / (mbs - mcs);    //DIFFERENT!!!!
+    }
+    // 4) all three masses are non-zero
+    // 4.1) all masses are equal
+    else if (mas == mbs and mbs == mcs and mas != 0)
+    {
+        C = 11;
+        res = 1.0 /(2*mas);
+    }
+    // 4.2) only two masses are equal
+    else if (mas == mbs and mas != 0 and mas != mcs and mcs != 0)
+    {
+        C = 12;
+        res = (mas - mcs + mcs * std::log(mcs/mas)) * std::pow((mas-mcs),-2);
+    }
+    else if (mas == mcs and mas != 0 and mas != mbs and mbs != 0)
+    {
+        C = 13;
+        res = (mas - mbs + mbs * std::log(mbs/mas)) * std::pow((mas-mbs),-2);
+    }
+    else if (mbs == mcs and mbs != 0 and mbs != mas and mas != 0)
+    {
+        C = 14;
+        res = (mbs - mas + mas * std::log(mas/mbs)) * std::pow((mas-mbs),-2);
+    }
+    // 4.3) all masses are not equal
+    else
+    {
+        C = 15;
+        res = mas*LogA/((mas-mbs)*(mas-mcs)) + mbs*LogB/((mbs-mas)*(mbs-mcs)) + mcs*LogC/((mcs-mas)*(mcs-mbs));
+    }
+
+    if(std::isnan(res) or std::isinf(res)) {
+    	std::string throwstring = "Found nan at line = ";
+    	throwstring += std::to_string(InputLineNumber);
+    	throwstring += " in function ";
+    	throwstring+= __func__;
+    	throwstring+= "\n";
+    	std::cerr << "Found nan at line = " << InputLineNumber << " in function " << __func__ << std::endl;
+        std::cerr << mas << sep << mbs << sep << mcs << sep << res << sep << C << sep << std::endl;
+    	throw std::runtime_error(throwstring.c_str());
+    }
+
+    return res;
+}
 
 
-
+/*
 double Class_Potential_Origin::fbaseTri(double MassSquaredA, double MassSquaredB, double MassSquaredC) const
 {
     double res = 0;
@@ -549,7 +872,7 @@ double Class_Potential_Origin::fbaseTri(double MassSquaredA, double MassSquaredB
 
     return res;
 }
-
+*/
 
 double Class_Potential_Origin::fbase(double MassSquaredA,double MassSquaredB) const
 {
@@ -1587,19 +1910,19 @@ std::vector<double> Class_Potential_Origin::WeinbergFourthDerivative() const{
 						{
 							for(std::size_t c=0;c<NHiggs;c++)
 							{
-								double f1 = fbaseTri(MassSquaredHiggs[a], MassSquaredHiggs[b], MassSquaredHiggs[c]);
-								double f2 = Couplings_Higgs_Triple[a][b][i4];
-								double f3 = Couplings_Higgs_Quartic[b][c][i1][i2];
-								double f4 = Couplings_Higgs_Triple[c][a][i3];
-								HiggsPart[i1][i2][i3][i4] += 0.2e1*f1*f2*f3*f4;
+								double f1h = fbaseTri(MassSquaredHiggs[a], MassSquaredHiggs[b], MassSquaredHiggs[c]);
+								double f2h = Couplings_Higgs_Triple[a][b][i4];
+								double f3h = Couplings_Higgs_Quartic[b][c][i1][i2];
+								double f4h = Couplings_Higgs_Triple[c][a][i3];
+								HiggsPart[i1][i2][i3][i4] += 0.2e1*f1h*f2h*f3h*f4h;
 								for(std::size_t d=0;d<NHiggs;d++)
 								{
-									double f1 = fbasequad(MassSquaredHiggs[a],MassSquaredHiggs[b],MassSquaredHiggs[c],MassSquaredHiggs[d]);
-									double f2 = Couplings_Higgs_Triple[a][b][i4];
-									double f3 = Couplings_Higgs_Triple[b][c][i1];
-									double f4 = Couplings_Higgs_Triple[c][d][i2];
-									double f5 = Couplings_Higgs_Triple[d][a][i3];
-									HiggsPart[i1][i2][i3][i4] += f1*f2*f3*f4*f5;
+									double f1h1 = fbasequad(MassSquaredHiggs[a],MassSquaredHiggs[b],MassSquaredHiggs[c],MassSquaredHiggs[d]);
+									double f2h2 = Couplings_Higgs_Triple[a][b][i4];
+									double f3h3 = Couplings_Higgs_Triple[b][c][i1];
+									double f4h4 = Couplings_Higgs_Triple[c][d][i2];
+									double f5h5 = Couplings_Higgs_Triple[d][a][i3];
+									HiggsPart[i1][i2][i3][i4] += f1h1*f2h2*f3h3*f4h4*f5h5;
 								}
 							}
 							double Br = fbase(MassSquaredHiggs[a],MassSquaredHiggs[b]) - C_CWcbHiggs + 0.5;
@@ -1615,19 +1938,19 @@ std::vector<double> Class_Potential_Origin::WeinbergFourthDerivative() const{
                                                 {
                                                         for(std::size_t c=0;c<NGauge;c++)
                                                         {
-                                                                double f1 = fbaseTri(MassSquaredGauge[a], MassSquaredGauge[b], MassSquaredGauge[c]);
-                                                                double f2 = Couplings_Gauge_Higgs_21[a][b][i4];
-                                                                double f3 = Couplings_Gauge_Higgs_22[b][c][i1][i2];
-                                                                double f4 = Couplings_Gauge_Higgs_21[c][a][i3];
-                                                                GaugePart[i1][i2][i3][i4] += 0.2e1*f1*f2*f3*f4;
-                                                                for(std::size_t d=0;d<NHiggs;d++)
+                                                                double f1g = fbaseTri(MassSquaredGauge[a], MassSquaredGauge[b], MassSquaredGauge[c]);
+                                                                double f2g = Couplings_Gauge_Higgs_21[a][b][i4];
+                                                                double f3g = Couplings_Gauge_Higgs_22[b][c][i1][i2];
+                                                                double f4g = Couplings_Gauge_Higgs_21[c][a][i3];
+                                                                GaugePart[i1][i2][i3][i4] +=  0.2e1*f1g*f2g*f3g*f4g;
+                                                                for(std::size_t d=0;d<NGauge;d++)
                                                                 {
-                                                                        double f1 = fbasequad(MassSquaredGauge[a],MassSquaredGauge[b],MassSquaredGauge[c], MassSquaredGauge[d]);
-                                                                        double f2 = Couplings_Gauge_Higgs_21[a][b][i4];
-                                                                        double f3 = Couplings_Gauge_Higgs_21[b][c][i1];
-                                                                        double f4 = Couplings_Gauge_Higgs_21[c][d][i2];
-                                                                        double f5 = Couplings_Gauge_Higgs_21[d][a][i3];
-                                                                        GaugePart[i1][i2][i3][i4] += f1*f2*f3*f4*f5;
+                                                                        double f1g1 = fbasequad(MassSquaredGauge[a],MassSquaredGauge[b],MassSquaredGauge[c], MassSquaredGauge[d]);
+                                                                        double f2g2 = Couplings_Gauge_Higgs_21[a][b][i4];
+                                                                        double f3g3 = Couplings_Gauge_Higgs_21[b][c][i1];
+                                                                        double f4g4 = Couplings_Gauge_Higgs_21[c][d][i2];
+                                                                        double f5g5 = Couplings_Gauge_Higgs_21[d][a][i3];
+                                                                        GaugePart[i1][i2][i3][i4] += f1g1*f2g2*f3g3*f4g4*f5g5;
                                                                 }
                                                         }
                                                         double Br = fbase(MassSquaredGauge[a],MassSquaredGauge[b]) - C_CWcbGB + 0.5;
@@ -1643,19 +1966,19 @@ std::vector<double> Class_Potential_Origin::WeinbergFourthDerivative() const{
 						{
 							for(std::size_t c=0;c<NQuarks;c++)
 							{
-								std::complex<double> f1 = fbaseTri(MassSquaredQuark[a], MassSquaredQuark[b], MassSquaredQuark[c]);
-								std::complex<double> f2 = Couplings_Quark_Higgs_21[a][b][i4];
-								std::complex<double> f3 = Couplings_Quark_Higgs_22[b][c][i1][i2];
-								std::complex<double> f4 = Couplings_Quark_Higgs_21[c][a][i3];
-								QuarkPart[i1][i2][i3][i4] += 0.2e1*f1*f2*f3*f4;
+								std::complex<double> f1q = fbaseTri(MassSquaredQuark[a], MassSquaredQuark[b], MassSquaredQuark[c]);
+								std::complex<double> f2q = Couplings_Quark_Higgs_21[a][b][i4];
+								std::complex<double> f3q = Couplings_Quark_Higgs_22[b][c][i1][i2];
+								std::complex<double> f4q = Couplings_Quark_Higgs_21[c][a][i3];
+								QuarkPart[i1][i2][i3][i4] = QuarkPart[i1][i2][i3][i4] + 0.2e1*f1q*f2q*f3q*f4q;
 								for(std::size_t d=0;d<NQuarks;d++)
 								{
-									std::complex<double> f1 = fbasequad(MassSquaredQuark[a],MassSquaredQuark[b],MassSquaredQuark[c], MassSquaredQuark[d]);
-									std::complex<double> f2 = Couplings_Quark_Higgs_21[a][b][i4];
-									std::complex<double> f3 = Couplings_Quark_Higgs_21[b][c][i1];
-									std::complex<double> f4 = Couplings_Quark_Higgs_21[c][d][i2];
-									std::complex<double> f5 = Couplings_Quark_Higgs_21[d][a][i3];
-									QuarkPart[i1][i2][i3][i4] += f1*f2*f3*f4*f5;
+									std::complex<double> f1q1 = fbasequad(MassSquaredQuark[a],MassSquaredQuark[b],MassSquaredQuark[c], MassSquaredQuark[d]);
+									std::complex<double> f2q2 = Couplings_Quark_Higgs_21[a][b][i4];
+									std::complex<double> f3q3 = Couplings_Quark_Higgs_21[b][c][i1];
+									std::complex<double> f4q4 = Couplings_Quark_Higgs_21[c][d][i2];
+									std::complex<double> f5q5 = Couplings_Quark_Higgs_21[d][a][i3];
+									QuarkPart[i1][i2][i3][i4] += f1q1*f2q2*f3q3*f4q4*f5q5;
 								}
 							}
 							std::complex<double> Br = fbase(MassSquaredQuark[a],MassSquaredQuark[b]) - C_CWcbFermion + 0.5;
@@ -1665,25 +1988,25 @@ std::vector<double> Class_Potential_Origin::WeinbergFourthDerivative() const{
 						}
 					}
 					LeptonPart[i1][i2][i3][i4] = 0;
-					for(std::size_t a=0;a<NGauge;a++)
+					for(std::size_t a=0;a<NLepton;a++)
 					{
-						for(std::size_t b=0;b<NGauge;b++)
+						for(std::size_t b=0;b<NLepton;b++)
 						{
-							for(std::size_t c=0;c<NGauge;c++)
+							for(std::size_t c=0;c<NLepton;c++)
 							{
-								std::complex<double> f1 = fbaseTri(MassSquaredLepton[a], MassSquaredLepton[b], MassSquaredLepton[c]);
-								std::complex<double> f2 = Couplings_Lepton_Higgs_21[a][b][i4];
-								std::complex<double> f3 = Couplings_Lepton_Higgs_22[b][c][i1][i2];
-								std::complex<double> f4 = Couplings_Lepton_Higgs_21[c][a][i3];
-								LeptonPart[i1][i2][i3][i4] += 0.2e1*f1*f2*f3*f4;
-								for(std::size_t d=0;d<NHiggs;d++)
+								std::complex<double> f1l = fbaseTri(MassSquaredLepton[a],MassSquaredLepton[b],MassSquaredLepton[c]);
+								std::complex<double> f2l = Couplings_Lepton_Higgs_21[a][b][i4];
+								std::complex<double> f3l = Couplings_Lepton_Higgs_22[b][c][i1][i2];
+								std::complex<double> f4l = Couplings_Lepton_Higgs_21[c][a][i3];
+								LeptonPart[i1][i2][i3][i4] += 0.2e1*f1l*f2l*f3l*f4l;
+								for(std::size_t d=0;d<NLepton;d++)
 								{
-									std::complex<double> f1 = fbasequad(MassSquaredLepton[a],MassSquaredLepton[b],MassSquaredLepton[c], MassSquaredLepton[d]);
-									std::complex<double> f2 = Couplings_Lepton_Higgs_21[a][b][i4];
-									std::complex<double> f3 = Couplings_Lepton_Higgs_21[b][c][i1];
-									std::complex<double> f4 = Couplings_Lepton_Higgs_21[c][d][i2];
-									std::complex<double> f5 = Couplings_Lepton_Higgs_21[d][a][i3];
-									LeptonPart[i1][i2][i3][i4] += f1*f2*f3*f4*f5;
+									std::complex<double> f1l1 = fbasequad(MassSquaredLepton[a],MassSquaredLepton[b],MassSquaredLepton[c], MassSquaredLepton[d]);
+									std::complex<double> f2l1 = Couplings_Lepton_Higgs_21[a][b][i4];
+									std::complex<double> f3l1 = Couplings_Lepton_Higgs_21[b][c][i1];
+									std::complex<double> f4l1 = Couplings_Lepton_Higgs_21[c][d][i2];
+									std::complex<double> f5l1 = Couplings_Lepton_Higgs_21[d][a][i3];
+									LeptonPart[i1][i2][i3][i4] += f1l1*f2l1*f3l1*f4l1*f5l1;
 								}
  							}
 							std::complex<double> Br = fbase(MassSquaredLepton[a],MassSquaredLepton[b]) - C_CWcbFermion + 0.5;
@@ -3100,15 +3423,11 @@ void Class_Potential_Origin::CheckImplementation(
 
         std::vector<double> TreeMass,NLOMass;
 
-
-	std::cout << " The matrix of eigenvectors esTree : " << std::endl << esTree.eigenvectors() << std::endl << std::endl;
-	std::cout << "The matrix of eigenvectors esMLO : " << std::endl << esNLO.eigenvectors() << std::endl << std::endl; 
         for(std::size_t i =0;i<NHiggs;i++){
             if(std::abs(esTree.eigenvalues()[i]) < ZeroMass) TreeMass.push_back(0);
             else TreeMass.push_back(esTree.eigenvalues()[i]);
             if(std::abs(esNLO.eigenvalues()[i]) < ZeroMass) NLOMass.push_back(0);
             else NLOMass.push_back(esNLO.eigenvalues()[i]);
-            
         }
 
         std::cout << "The higgs masses squared at LO | NLO are : " << std::endl;
