@@ -14,9 +14,9 @@ set(header
 	${header_path}/ClassPotentialR2HDM.h
   ${header_path}/ClassPotentialRN2HDM.h
   ${header_path}/ClassPotentialCxSM.h
-
   # Here you can add your new model
   ${header_path}/ClassTemplate.h
+  ${header_path}/CPDark.h
 )
 
 set(src
@@ -35,6 +35,7 @@ set(src
 
   # Here you can add your new model
   ClassTemplate.cpp
+  CPDark.cpp
 )
 
 add_library(Models ${header} ${src})
